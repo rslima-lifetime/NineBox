@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { Plus, Trash2, Printer } from 'lucide-react';
+
+// Definição das 9 caixas com as cores extraídas da imagem
+const BOXES = [
+  { id: 'promissor', title: 'PROMISSOR', bg: 'bg-[#9ae0b1]' },
+  { id: 'alto-potencial', title: 'ALTO POTENCIAL', bg: 'bg-[#62d47e]' },
+  { id: 'sucessor', title: 'SUCESSOR', bg: 'bg-[#4bc969]' },
+  { id: 'em-desenvolvimento', title: 'EM DESENVOLVIMENTO', bg: 'bg-[#fad186]' },
+  { id: 'consistente', title: 'CONSISTENTE', bg: 'bg-[#cce8d4]' },
+  { id: 'exemplar', title: 'EXEMPLAR', bg: 'bg-[#bee5ce]' },
+  { id: 'desenvolver', title: 'DESENVOLVER', bg: 'bg-[#ec6c60]' },
+  { id: 'acompanhar', title: 'ACOMPANHAR', bg: 'bg-[#f49c55]' },
+  { id: 'especialista', title: 'ESPECIALISTA', bg: 'bg-[#f7ba4a]' },
+];
+
+// Estado inicial baseado na sua imagem
+const INITIAL_EMPLOYEES = [
+  { id: '1', name: 'Diogo Calixto', avatar: 'https://ui-avatars.com/api/?name=Diogo+Calixto&background=random&color=fff', boxId: 'promissor' },
+  { id: '2', name: 'Rogerio Sevilha', avatar: 'https://ui-avatars.com/api/?name=Rogerio+Sevilha&background=random&color=fff', boxId: 'promissor' },
+  { id: '3', name: 'Marcelo de Paula', avatar: 'https://ui-avatars.com/api/?name=Marcelo+de+Paula&background=random&color=fff', boxId: 'alto-potencial' },
+  { id: '4', name: 'Gilvan Junior', avatar: 'https://ui-avatars.com/api/?name=Gilvan+Junior&background=random&color=fff', boxId: 'em-desenvolvimento' },
+  { id: '5', name: 'Fabio Marinho', avatar: 'https://ui-avatars.com/api/?name=Fabio+Marinho&background=random&color=fff', boxId: 'em-desenvolvimento' },
+  { id: '6', name: 'Fernando Volpi', avatar: 'https://ui-avatars.com/api/?name=Fernando+Volpi&background=random&color=fff', boxId: 'em-desenvolvimento' },
+  { id: '7', name: 'Camila Beck', avatar: 'https://ui-avatars.com/api/?name=Camila+Beck&background=random&color=fff', boxId: 'desenvolver' },
+  { id: '8', name: 'Jailson Cruz', avatar: 'https://ui-avatars.com/api/?name=Jailson+Cruz&background=random&color=fff', boxId: 'desenvolver' },
+  { id: '9', name: 'Vinicius Carvalho', avatar: 'https://ui-avatars.com/api/?name=Vinicius+Carvalho&background=random&color=fff', boxId: 'desenvolver' },
+  { id: '10', name: 'Flavia Lima', avatar: 'https://ui-avatars.com/api/?name=Flavia+Lima&background=random&color=fff', boxId: 'desenvolver' },
+  { id: '11', name: 'Sandra Guedes', avatar: 'https://ui-avatars.com/api/?name=Sandra+Guedes&background=random&color=fff', boxId: 'acompanhar' },
+];
+
+export default function App() {
+  const [employees, setEmployees] = useState(INITIAL_EMPLOYEES);
+  const [newName, setNewName] = useState('');
+  const [selectedBox, setSelectedBox] = useState('desenvolver');
+
+  // Funcionalidade de Drag and Drop
+  const handleDragStart = (e, employeeId) => {
+    e.dataTransfer.setData('employeeId', employeeId);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessário para permitir o drop
+  };
+
+  const handleDrop = (e, targetBoxId) => {
+    e.preventDefault();
+    const employeeId = e.dataTransfer.getData('employeeId');
+    
+    setEmployees(prev => prev.map(emp => 
+      emp.id === employeeId ? { ...emp, boxId: targetBoxId } : emp
+    ));
+  };
+
+  // Adicionar e Remover Colaboradores
+  const handleAddEmployee = (e) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+
+    const newEmployee = {
+      id: Date.now().toString(),
+      name: newName,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=random&color=fff`,
+      boxId: selectedBox
+    };
+
+    setEmployees([...employees, newEmployee]);
+    setNewName('');
+  };
+
+  const handleDelete = (id) => {
+    setEmployees(employees.filter(emp => emp.id !== id));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8 font-sans">
+      
+      {/* Controles de Topo (Não aparecem na impressão) */}
+      <div className="max-w-6xl mx-auto mb-8 bg-white p-4 rounded-lg shadow print:hidden flex flex-wrap gap-4 items-center justify-between">
+        <form onSubmit={handleAddEmployee} className="flex gap-2 items-center flex-1">
+          <input 
+            type="text" 
+            placeholder="Nome do Colaborador" 
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <select 
+            value={selectedBox} 
+            onChange={(e) => setSelectedBox(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {BOXES.map(box => (
+              <option key={box.id} value={box.id}>{box.title}</option>
+            ))}
+          </select>
+          <button 
+            type="submit" 
+            className="bg-[#006bc6] text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700 transition"
+          >
+            <Plus size={18} /> Adicionar
+          </button>
+        </form>
+
+        <button 
+          onClick={() => window.print()} 
+          className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-900 transition"
+        >
+          <Printer size={18} /> Imprimir / PDF
+        </button>
+      </div>
+
+      {/* Container Principal do Nine Box */}
+      <div className="max-w-6xl mx-auto bg-white p-6 shadow-xl rounded-xl">
+        
+        <div className="relative flex flex-col w-full">
+          
+          <div className="flex">
+            {/* Eixo Y - Lado Esquerdo */}
+            <div className="flex flex-col mr-2">
+              <div className="flex flex-1 h-[600px]">
+                <div className="bg-[#006bc6] w-12 flex items-center justify-center rounded-tl-md relative">
+                  <span 
+                    className="text-white font-bold text-lg tracking-[0.2em] whitespace-nowrap"
+                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                  >
+                    POTENCIAL DE DESENVOLVIMENTO
+                  </span>
+                </div>
+                
+                {/* Marcadores e Seta Y */}
+                <div className="w-16 flex flex-col justify-around items-center py-16 relative bg-white">
+                  {/* Linha da Seta */}
+                  <div className="absolute right-2 top-8 bottom-8 w-[2px] bg-gray-600"></div>
+                  {/* Ponta da Seta */}
+                  <div className="absolute right-[3px] top-8 w-3 h-3 border-t-[2px] border-l-[2px] border-gray-600 transform rotate-45"></div>
+                  
+                  <span className="-rotate-90 font-bold text-gray-600 text-sm whitespace-nowrap">3. ALTA</span>
+                  <span className="-rotate-90 font-bold text-gray-600 text-sm whitespace-nowrap">2. MÉDIA</span>
+                  <span className="-rotate-90 font-bold text-gray-600 text-sm whitespace-nowrap">1. BAIXA</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid Principal 3x3 */}
+            <div className="flex-1 grid grid-cols-3 grid-rows-3 gap-2 h-[600px]">
+              {BOXES.map((box) => (
+                <div 
+                  key={box.id}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, box.id)}
+                  className={`${box.bg} p-2 flex flex-col shadow-sm border border-white/40 overflow-hidden relative`}
+                >
+                  <h3 className="text-white text-center font-bold text-xs sm:text-sm mb-3 tracking-wide drop-shadow-sm">
+                    {box.title}
+                  </h3>
+                  
+                  {/* Área dos Avatares */}
+                  <div className="flex-1 flex flex-wrap gap-2 justify-center content-start overflow-y-auto custom-scrollbar">
+                    {employees.filter(emp => emp.boxId === box.id).map(emp => (
+                      <div 
+                        key={emp.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, emp.id)}
+                        className="group flex flex-col items-center w-[70px] cursor-grab active:cursor-grabbing relative animate-fade-in"
+                        title={emp.name}
+                      >
+                        <button 
+                          onClick={() => handleDelete(emp.id)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 print:hidden"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                        <img 
+                          src={emp.avatar} 
+                          alt={emp.name} 
+                          className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md pointer-events-none"
+                        />
+                        <span className="text-[11px] leading-tight text-center text-gray-800 font-medium mt-1">
+                          {emp.name.split(' ').map((n, i) => <React.Fragment key={i}>{n}<br/></React.Fragment>)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Eixo X - Parte Inferior */}
+          <div className="flex mt-2">
+            {/* Espaçador para alinhar com o eixo Y */}
+            <div className="w-[112px] mr-2"></div>
+            
+            <div className="flex-1">
+              {/* Marcadores e Seta X */}
+              <div className="flex justify-around items-center h-12 relative w-full mb-2">
+                 {/* Linha da Seta */}
+                 <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-[2px] bg-gray-600"></div>
+                 {/* Ponta da Seta */}
+                 <div className="absolute right-8 top-1/2 -translate-y-[6px] w-3 h-3 border-t-[2px] border-r-[2px] border-gray-600 transform rotate-45 bg-white"></div>
+                 
+                 <span className="font-bold text-gray-600 text-sm bg-white px-2 z-10">1. BAIXA</span>
+                 <span className="font-bold text-gray-600 text-sm bg-white px-2 z-10">2. MÉDIA</span>
+                 <span className="font-bold text-gray-600 text-sm bg-white px-2 z-10">3. ALTA</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Barra L Azul Inferior */}
+          <div className="flex">
+            {/* Conexão da quina */}
+            <div className="bg-[#006bc6] w-12 h-14 rounded-bl-md mr-2"></div>
+            {/* Barra horizontal */}
+            <div className="bg-[#006bc6] flex-1 h-14 flex items-center justify-center rounded-br-md rounded-tr-md ml-[64px]">
+              <span className="text-white font-bold text-xl tracking-[0.3em]">
+                PRONTIDÃO
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
